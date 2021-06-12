@@ -14,6 +14,7 @@ using System.Dynamic;
 using System.Reflection;
 using System.Text;
 using CommandLine;
+using Microsoft.Extensions.Options;
 
 namespace PingTool
 {
@@ -31,6 +32,7 @@ namespace PingTool
 
         private static IPAddress Target;
         private static int Intervall;
+        private static bool optionsValid = true;
 
         static void Main(string[] args)
         {
@@ -41,28 +43,32 @@ namespace PingTool
             var logfileName = ConfigurationManager.AppSettings["FileName"] ?? _defaultLogFileName;
             var outputTemplate = ConfigurationManager.AppSettings["OutputTemplate"] ?? _defaultoutputTemplate;
 
-            _pingResult = new PingResults();
-
-
-            var saveFile = Path.Combine(Directory.GetCurrentDirectory(), logfileName);
-            saveFile = Path.ChangeExtension(saveFile, "txt");
-
-            SetupLogger(outputTemplate, saveFile);
-
-            OutputStartText(Target, saveFile);
-
-            Log.Information("Pingvorgang gestartet.");
-
-            while (!Console.KeyAvailable)
+            if (optionsValid)
             {
-                PingHost(Target);
-                Thread.Sleep(Intervall * 1000);
+                _pingResult = new PingResults();
+
+
+                var saveFile = Path.Combine(Directory.GetCurrentDirectory(), logfileName);
+                saveFile = Path.ChangeExtension(saveFile, "txt");
+
+                SetupLogger(outputTemplate, saveFile);
+
+                OutputStartText(Target, saveFile);
+
+                Log.Information("Pingvorgang gestartet.");
+
+                while (!Console.KeyAvailable)
+                {
+                    PingHost(Target);
+                    Thread.Sleep(Intervall * 1000);
+                }
+
+                Console.ReadKey();
+
+                OutputStatistics();
+
+                Log.CloseAndFlush();
             }
-            Console.ReadKey();
-
-            OutputStatistics();
-
-            Log.CloseAndFlush();
 
             Console.WriteLine("Um das Fenster zu schließen, drücke irgendeine Taste.");
             Console.ReadKey();
@@ -76,8 +82,7 @@ namespace PingTool
 
         static void HandleParseError(IEnumerable<Error> errs)
         {
-            Target = IPAddress.Parse(Defaults.DefaultTarget);
-            Intervall = Defaults.DefaultIntervall;
+            optionsValid = false;
         }
 
         private static void SetupLogger(string outputTemplate, string saveFile)
