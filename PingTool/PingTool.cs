@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -12,6 +13,7 @@ using System.Configuration;
 using System.Dynamic;
 using System.Reflection;
 using System.Text;
+using CommandLine;
 
 namespace PingTool
 {
@@ -21,22 +23,24 @@ namespace PingTool
 
         private static string _defaultoutputTemplate = "[{Timestamp:dd-MM-yyyy HH:mm:ss}] {Message:lj}{NewLine}{Exception}";
 
-        private static string _defaultTarget = "8.8.8.8";
-
         private static string _configFilePath;
-
-        private static int _defaultTimeBetweenPings = 1;
 
         private static PingResults _pingResult;
 
-        public static int PingTimeout => ((int) Math.Floor(_defaultTimeBetweenPings * 1000 * 0.8));
+        public static int PingTimeout => ((int) Math.Floor(Intervall * 1000 * 0.8));
+
+        private static IPAddress Target;
+        private static int Intervall;
 
         static void Main(string[] args)
         {
+            CommandLine.Parser.Default.ParseArguments<Options>(args)
+                .WithParsed(RunOptions)
+                .WithNotParsed(HandleParseError);
 
             var logfileName = ConfigurationManager.AppSettings["FileName"] ?? _defaultLogFileName;
             var outputTemplate = ConfigurationManager.AppSettings["OutputTemplate"] ?? _defaultoutputTemplate;
-            var target = IPAddress.Parse(ConfigurationManager.AppSettings["Target"] ?? _defaultTarget);
+
             _pingResult = new PingResults();
 
 
@@ -45,14 +49,14 @@ namespace PingTool
 
             SetupLogger(outputTemplate, saveFile);
 
-            OutputStartText(target, saveFile);
+            OutputStartText(Target, saveFile);
 
             Log.Information("Pingvorgang gestartet.");
 
             while (!Console.KeyAvailable)
             {
-                PingHost(target);
-                Thread.Sleep(_defaultTimeBetweenPings * 1000);
+                PingHost(Target);
+                Thread.Sleep(Intervall * 1000);
             }
             Console.ReadKey();
 
@@ -62,6 +66,18 @@ namespace PingTool
 
             Console.WriteLine("Um das Fenster zu schließen, drücke irgendeine Taste.");
             Console.ReadKey();
+        }
+
+        static void RunOptions(Options opts)
+        {
+            Target = IPAddress.Parse(opts.Target);
+            Intervall = opts.Intervall;
+        }
+
+        static void HandleParseError(IEnumerable<Error> errs)
+        {
+            Target = IPAddress.Parse(Defaults.DefaultTarget);
+            Intervall = Defaults.DefaultIntervall;
         }
 
         private static void SetupLogger(string outputTemplate, string saveFile)
@@ -80,7 +96,7 @@ namespace PingTool
             Log.Information($"Datum: {DateTime.Now.ToShortDateString()}");
             Log.Information($"Uhrzeit: {DateTime.Now.ToShortTimeString()}");
             Log.Information($"Ziel: {target}");
-            Log.Information($"Zeit zwischen Pings: {_defaultTimeBetweenPings}s");
+            Log.Information($"Zeit zwischen Pings: {Intervall}s");
             Log.Information($"Zeit bis  Ping Timeout: {PingTimeout}ms");
             Log.Debug($"Logfile wird gespeichert unter: {saveFile}");
             Log.Debug($"Um das Logging zu beenden, drücke irgendeine Taste.");
