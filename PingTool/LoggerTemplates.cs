@@ -24,17 +24,17 @@ namespace PingTool
 
         }
 
-        public static void OutputStatistics(PingResults pingResult)
+        public static void OutputStatistics(Pings pings)
         {
             Log.Information("Statistiken:");
-            Log.Information($"Anzahl an Pinganfragen: {pingResult.AmountOfTriedPings}");
-            Log.Information($"Anzahl an gesendeten Pings: {pingResult.AmountOfSendPings} => {pingResult.AmountOfSendPingsPercent:F2}%");
-            Log.Information($"Anzahl an erfolgreichen Pings: {pingResult.AmountOfSuccess} => {pingResult.AmountOfSuccessfulPingsPercent:F2}%");
-            Log.Information($"Anzahl an nicht erfolgreichen Pings: {pingResult.AmountOfOther} => {pingResult.AmountOfOtherPingsPercent:F2}%");
-            Log.Information($"Anzahl an nicht gesendeten Pings: {pingResult.AmountOfExceptions} => {pingResult.AmountOfExceptionsPercent:F2}");
-            Log.Information($"Minimale Latenz: {pingResult.MinLatency:F2}ms");
-            Log.Information($"MAximale Latenz: {pingResult.MaxLatency:F2}ms");
-            Log.Information($"Durchschnittliche Latenz: {pingResult.AverageLatency:F2}ms");
+            Log.Information($"Anzahl an Pinganfragen: {pings.Count}");
+            Log.Information($"Anzahl an gesendeten Pings: {pings.SentPings.Count} => {pings.Count / pings.SentPings.Count * 100:F2}%");
+            Log.Information($"Anzahl an erfolgreichen Pings: {pings.SuccessfulPings.Count} => {pings.SuccessfulPings.Count / pings.Count * 100:F2}%");
+            Log.Information($"Anzahl an nicht erfolgreichen Pings: {pings.UnknownPings.Count} => {pings.UnknownPings.Count / pings.Count * 100:F2}%");
+            Log.Information($"Anzahl an nicht gesendeten Pings: {pings.ExceptionPings.Count} => {pings.ExceptionPings.Count / pings.Count * 100:F2}");
+            Log.Information($"Minimale Latenz: {pings.MinLatency:F2}ms");
+            Log.Information($"MAximale Latenz: {pings.MaxLatency:F2}ms");
+            Log.Information($"Durchschnittliche Latenz: {pings.AvgLatency:F2}ms");
 
         }
     }
