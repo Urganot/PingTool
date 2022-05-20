@@ -11,6 +11,7 @@ namespace PingTool
         public long Latency { get; set; }
         public IPStatus Status { get; set; }
         public bool Exception { get; set; }
+        public string Time { get; set; }
 
         public static Ping Send(IPAddress ipAddress, int pingTimeout)
         {
@@ -25,7 +26,8 @@ namespace PingTool
                     {
                         Target = pingResult.Address.ToString(),
                         Latency = pingResult.RoundtripTime,
-                        Status = pingResult.Status
+                        Status = pingResult.Status,
+                        Time = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")
                     };
                 }
 

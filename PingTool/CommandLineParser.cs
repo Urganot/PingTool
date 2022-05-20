@@ -9,7 +9,7 @@ namespace PingTool
         public static void RunOptions(Options opts)
         {
             PingTool.Target = IPAddress.Parse(opts.Target);
-            PingTool.Interval = opts.Intervall;
+            PingTool.Interval = opts.Interval;
             PingTool.OutPutCsv = opts.OutputCsv;
         }
 

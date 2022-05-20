@@ -63,6 +63,8 @@ namespace PingTool
 
                 Console.ReadKey();
 
+                if (OutPutCsv) WriteCsvFile(Path.ChangeExtension(logfileName, "csv"), Pings);
+
                 LoggerTemplates.OutputStatistics(Pings);
 
                 Log.CloseAndFlush();
@@ -70,6 +72,15 @@ namespace PingTool
 
             Console.WriteLine("Um das Fenster zu schließen, drücke irgendeine Taste.");
             Console.ReadKey();
+        }
+
+        private static void WriteCsvFile(string fileName, Pings pings)
+        {
+            using (var writer = new StreamWriter(fileName))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                csv.WriteRecords(pings.pings);
+            }
         }
     }
 }

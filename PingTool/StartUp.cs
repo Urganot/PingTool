@@ -36,7 +36,7 @@ namespace PingTool
                 .MinimumLevel.Debug()
                 .WriteTo.Console(outputTemplate: outputTemplate)
                 .WriteTo.File(path: saveFile, restrictedToMinimumLevel: LogEventLevel.Information,
-                    outputTemplate: outputTemplate, rollingInterval: RollingInterval.Day)
+                    outputTemplate: outputTemplate, rollingInterval: RollingInterval.Minute, rollOnFileSizeLimit: true)
                 .CreateLogger();
         }
     }
