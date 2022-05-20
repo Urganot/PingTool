@@ -2,7 +2,7 @@
   "profiles": {
     "PingTool": {
       "commandName": "Project",
-      "commandLineArgs": "-t \"192.168.178.1\" -i 2"
+      "commandLineArgs": "-t \"8.8.8.8\" -i 1"
     }
   }
 }

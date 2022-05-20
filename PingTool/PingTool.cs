@@ -22,17 +22,17 @@ namespace PingTool
     {
         private static string _defaultLogFileName = "PingLogFiles\\Logfile";
 
-        private static string _defaultoutputTemplate = "[{Timestamp:dd-MM-yyyy HH:mm:ss}] {Message:lj}{NewLine}{Exception}";
+        private static readonly string _defaultOutputTemplate = "[{Timestamp:dd-MM-yyyy HH:mm:ss}] {Message:lj}{NewLine}{Exception}";
 
         private static string _configFilePath;
 
         private static PingResults _pingResult;
 
-        public static int PingTimeout => ((int) Math.Floor(Intervall * 1000 * 0.8));
+        public static int PingTimeout => ((int)Math.Floor(_interval * 1000 * 0.8));
 
-        private static IPAddress Target;
-        private static int Intervall;
-        private static bool optionsValid = true;
+        private static IPAddress _target;
+        private static int _interval;
+        private static bool _optionsValid = true;
 
         static void Main(string[] args)
         {
@@ -41,9 +41,9 @@ namespace PingTool
                 .WithNotParsed(HandleParseError);
 
             var logfileName = ConfigurationManager.AppSettings["FileName"] ?? _defaultLogFileName;
-            var outputTemplate = ConfigurationManager.AppSettings["OutputTemplate"] ?? _defaultoutputTemplate;
+            var outputTemplate = ConfigurationManager.AppSettings["OutputTemplate"] ?? _defaultOutputTemplate;
 
-            if (optionsValid)
+            if (_optionsValid)
             {
                 _pingResult = new PingResults();
 
@@ -53,19 +53,19 @@ namespace PingTool
 
                 SetupLogger(outputTemplate, saveFile);
 
-                OutputStartText(Target, saveFile);
+                LoggerTemplates.OutputStartText(_target, saveFile, _interval, PingTimeout);
 
                 Log.Information("Pingvorgang gestartet.");
 
                 while (!Console.KeyAvailable)
                 {
-                    PingHost(Target);
-                    Thread.Sleep(Intervall * 1000);
+                    PingHost(_target);
+                    Thread.Sleep(_interval * 1000);
                 }
 
                 Console.ReadKey();
 
-                OutputStatistics();
+                LoggerTemplates.OutputStatistics(_pingResult);
 
                 Log.CloseAndFlush();
             }
@@ -76,13 +76,13 @@ namespace PingTool
 
         static void RunOptions(Options opts)
         {
-            Target = IPAddress.Parse(opts.Target);
-            Intervall = opts.Intervall;
+            _target = IPAddress.Parse(opts.Target);
+            _interval = opts.Intervall;
         }
 
         static void HandleParseError(IEnumerable<Error> errs)
         {
-            optionsValid = false;
+            _optionsValid = false;
         }
 
         private static void SetupLogger(string outputTemplate, string saveFile)
@@ -95,30 +95,6 @@ namespace PingTool
                 .CreateLogger();
         }
 
-        private static void OutputStartText(IPAddress target, string saveFile)
-        {
-            Log.Information("Einstellungen");
-            Log.Information($"Datum: {DateTime.Now.ToShortDateString()}");
-            Log.Information($"Uhrzeit: {DateTime.Now.ToShortTimeString()}");
-            Log.Information($"Ziel: {target}");
-            Log.Information($"Zeit zwischen Pings: {Intervall}s");
-            Log.Information($"Zeit bis  Ping Timeout: {PingTimeout}ms");
-            Log.Debug($"Logfile wird gespeichert unter: {saveFile}");
-            Log.Debug($"Um das Logging zu beenden, drücke irgendeine Taste.");
-
-        }
-
-        private static void OutputStatistics()
-        {
-            Log.Information("Statistiken:");
-            Log.Information($"Anzahl an Pinganfragen: {_pingResult.AmountOfTriedPings}");
-            Log.Information($"Anzahl an gesendeten Pings: {_pingResult.AmountOfSendPings} => {_pingResult.AmountOfSendPingsPercent:F2}%");
-            Log.Information($"Anzahl an erfolgreichen Pings: {_pingResult.AmountOfSuccess} => {_pingResult.AmountOfSuccessfulPingsPercent:F2}%");
-            Log.Information($"Anzahl an nicht erfolgreichen Pings: {_pingResult.AmountOfOther} => {_pingResult.AmountOfOtherPingsPercent:F2}%");
-            Log.Information($"Anzahl an nicht gesendeten Pings: {_pingResult.AmountOfExceptions} => {_pingResult.AmountOfExceptionsPercent:F2}");
-            Log.Information($"Durchschnittliche Latenz: {_pingResult.AverageLatency:F2}ms");
-
-        }
 
         private static void CheckForConfigFile()
         {
@@ -155,11 +131,15 @@ namespace PingTool
                 if (reply != null)
                 {
                     Log.Information($"Pinged {reply.Address} Status: {reply.Status} Latency: {reply.RoundtripTime}ms");
-                    _pingResult.SumOfLatency += reply.RoundtripTime;
 
 
                     if (reply.Status == IPStatus.Success)
+                    {
+                        _pingResult.SumOfLatency += reply.RoundtripTime;
+                        _pingResult.MinLatency = Math.Min(_pingResult.MinLatency, reply.RoundtripTime);
+                        _pingResult.MaxLatency = Math.Max(_pingResult.MaxLatency, reply.RoundtripTime);
                         _pingResult.AmountOfSuccess++;
+                    }
                     else
                         _pingResult.AmountOfOther++;
                 }
