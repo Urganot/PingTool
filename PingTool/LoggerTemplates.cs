@@ -28,10 +28,10 @@ namespace PingTool
         {
             Log.Information("Statistiken:");
             Log.Information($"Anzahl an Pinganfragen: {pings.Count}");
-            Log.Information($"Anzahl an gesendeten Pings: {pings.SentPings.Count} => {pings.Count / pings.SentPings.Count * 100:F2}%");
-            Log.Information($"Anzahl an erfolgreichen Pings: {pings.SuccessfulPings.Count} => {pings.SuccessfulPings.Count / pings.Count * 100:F2}%");
-            Log.Information($"Anzahl an nicht erfolgreichen Pings: {pings.UnknownPings.Count} => {pings.UnknownPings.Count / pings.Count * 100:F2}%");
-            Log.Information($"Anzahl an nicht gesendeten Pings: {pings.ExceptionPings.Count} => {pings.ExceptionPings.Count / pings.Count * 100:F2}");
+            Log.Information($"Anzahl an gesendeten Pings: {pings.SentPings.Count} => {pings.Count / Math.Max(1, pings.SentPings.Count) * 100:F2}%");
+            Log.Information($"Anzahl an erfolgreichen Pings: {pings.SuccessfulPings.Count} => {pings.SuccessfulPings.Count / Math.Max(1, pings.Count) * 100:F2}%");
+            Log.Information($"Anzahl an nicht erfolgreichen Pings: {pings.UnknownPings.Count} => {pings.UnknownPings.Count / Math.Max(1, pings.Count) * 100:F2}%");
+            Log.Information($"Anzahl an nicht gesendeten Pings: {pings.ExceptionPings.Count} => {pings.ExceptionPings.Count / Math.Max(1, pings.Count) * 100:F2}");
             Log.Information($"Minimale Latenz: {pings.MinLatency:F2}ms");
             Log.Information($"MAximale Latenz: {pings.MaxLatency:F2}ms");
             Log.Information($"Durchschnittliche Latenz: {pings.AvgLatency:F2}ms");
