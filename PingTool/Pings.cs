@@ -20,8 +20,11 @@ namespace PingTool
         public int Count => pings.Count;
 
         public List<Ping> SuccessfulPings => pings.Where(ping => ping.Status == IPStatus.Success).ToList();
-        public List<Ping> UnknownPings => pings.Where(ping => ping.Status == IPStatus.Unknown).ToList();
+        public double SuccessfulPingsPercentage => ((double)SuccessfulPings.Count / pings.Count) * 100;
+        public List<Ping> FailedPings => pings.Where(ping => ping.Status != IPStatus.Success).ToList();
+        public double FailedPingsPercent => ((double)FailedPings.Count / pings.Count) * 100;
         public List<Ping> ExceptionPings => pings.Where(ping => ping.Exception).ToList();
+        public double ExceptionPingsPercentage => ((double)ExceptionPings.Count / pings.Count) * 100;
 
         public List<Ping> SentPings => pings.Where(ping => !ping.Exception).ToList();
 

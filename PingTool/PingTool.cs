@@ -53,19 +53,23 @@ namespace PingTool
                 LoggerTemplates.OutputStartText(Target, saveFile, Interval, PingTimeout);
 
                 Log.Information("Pingvorgang gestartet.");
+                ConsoleKey key = ConsoleKey.Spacebar;
 
-                while (!Console.KeyAvailable)
+                do
                 {
                     Pings.Add(Ping.Send(Target, PingTimeout));
 
                     Thread.Sleep(Interval * 1000);
-                }
 
-                Console.ReadKey();
+                    if (Console.KeyAvailable)
+                    {
+                        key = Console.ReadKey().Key;
+                        if (key != ConsoleKey.Escape) LoggerTemplates.OutputIntermediateStatistics(Pings);
+                        else LoggerTemplates.OutputEndStatistics(Pings);
+                    }
+                } while (key != ConsoleKey.Escape);
 
                 if (OutPutCsv) WriteCsvFile(Path.ChangeExtension(logfileName, "csv"), Pings);
-
-                LoggerTemplates.OutputStatistics(Pings);
 
                 Log.CloseAndFlush();
             }

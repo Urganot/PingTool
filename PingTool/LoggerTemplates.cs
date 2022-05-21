@@ -20,18 +20,34 @@ namespace PingTool
             Log.Information($"Zeit zwischen Pings: {interval}s");
             Log.Information($"Zeit bis  Ping Timeout: {pingTimeout}ms");
             Log.Debug($"Logfile wird gespeichert unter: {saveFile}");
-            Log.Debug($"Um das Logging zu beenden, drücke irgendeine Taste.");
+            Log.Debug($"Um einen zwischenstand anzuzeigen, drücke eine beliebige taste..");
+            Log.Debug($"Um das Logging zu beenden, drücke ESC.");
 
+        }
+
+        public static void OutputIntermediateStatistics(Pings pings)
+        {
+            Log.Information("-----------------------------------------------------------------------");
+            Log.Information("Zwischenstand:");
+            OutputStatistics(pings);
+            Log.Information("-----------------------------------------------------------------------");
+        }
+        public static void OutputEndStatistics(Pings pings)
+        {
+            Log.Information("-----------------------------------------------------------------------");
+            Log.Information("Endergebnis:");
+            OutputStatistics(pings);
+            Log.Information("-----------------------------------------------------------------------");
         }
 
         public static void OutputStatistics(Pings pings)
         {
-            Log.Information("Statistiken:");
+
             Log.Information($"Anzahl an Pinganfragen: {pings.Count}");
-            Log.Information($"Anzahl an gesendeten Pings: {pings.SentPings.Count} => {pings.Count / Math.Max(1, pings.SentPings.Count) * 100:F2}%");
-            Log.Information($"Anzahl an erfolgreichen Pings: {pings.SuccessfulPings.Count} => {pings.SuccessfulPings.Count / Math.Max(1, pings.Count) * 100:F2}%");
-            Log.Information($"Anzahl an nicht erfolgreichen Pings: {pings.UnknownPings.Count} => {pings.UnknownPings.Count / Math.Max(1, pings.Count) * 100:F2}%");
-            Log.Information($"Anzahl an nicht gesendeten Pings: {pings.ExceptionPings.Count} => {pings.ExceptionPings.Count / Math.Max(1, pings.Count) * 100:F2}");
+            Log.Information($"Anzahl an gesendeten Pings: {pings.SentPings.Count} => {(pings.Count / Math.Max(1, pings.SentPings.Count)) * 100:F2}%");
+            Log.Information($"Anzahl an erfolgreichen Pings: {pings.SuccessfulPings.Count} => {pings.SuccessfulPingsPercentage:F2}%");
+            Log.Information($"Anzahl an nicht erfolgreichen Pings: {pings.FailedPings.Count} => {pings.FailedPingsPercent:F2}%");
+            Log.Information($"Anzahl an nicht gesendeten Pings: {pings.ExceptionPings.Count} => {pings.ExceptionPingsPercentage:F2}");
             Log.Information($"Minimale Latenz: {pings.MinLatency:F2}ms");
             Log.Information($"MAximale Latenz: {pings.MaxLatency:F2}ms");
             Log.Information($"Durchschnittliche Latenz: {pings.AvgLatency:F2}ms");
