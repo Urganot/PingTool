@@ -63,7 +63,7 @@ namespace PingTool
 
                     if (Console.KeyAvailable)
                     {
-                        key = Console.ReadKey().Key;
+                        key = Console.ReadKey(true).Key;
                         if (key != ConsoleKey.Escape) LoggerTemplates.OutputIntermediateStatistics(Pings);
                         else LoggerTemplates.OutputEndStatistics(Pings);
                     }
