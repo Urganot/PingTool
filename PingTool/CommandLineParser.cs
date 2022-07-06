@@ -4,7 +4,7 @@ using CommandLine;
 
 namespace PingTool
 {
-    static internal class CommandLineParser
+    internal static class CommandLineParser
     {
         public static void RunOptions(Options opts)
         {

@@ -20,13 +20,13 @@ using Microsoft.Extensions.Options;
 
 namespace PingTool
 {
-    class PingTool
+    static class PingTool
     {
         private static string _defaultLogFileName = "PingLogFiles\\Logfile";
 
         private static readonly string _defaultOutputTemplate = "[{Timestamp:dd-MM-yyyy HH:mm:ss}] {Message:lj}{NewLine}{Exception}";
 
-        public static int PingTimeout => ((int)Math.Floor(Interval * 1000 * 0.8));
+        private static int PingTimeout => ((int)Math.Floor(Interval * 1000 * 0.8));
 
         public static IPAddress Target;
         public static int Interval;

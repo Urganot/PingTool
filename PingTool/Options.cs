@@ -12,7 +12,4 @@ class Options
 
     [Option('c', "csv", Default = Defaults.DefaultIntervall, HelpText = "Creates an additional csv file.")]
     public bool OutputCsv { get; set; }
-
-
-
 }

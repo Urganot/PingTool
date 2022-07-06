@@ -8,7 +8,7 @@ using Serilog;
 
 namespace PingTool
 {
-    class LoggerTemplates
+    static class LoggerTemplates
     {
 
         public static void OutputStartText(IPAddress target, string saveFile, int interval, int pingTimeout)
@@ -44,10 +44,10 @@ namespace PingTool
         {
 
             Log.Information($"Anzahl an Pinganfragen: {pings.Count}");
-            Log.Information($"Anzahl an gesendeten Pings: {pings.SentPings.Count} => {(pings.Count / Math.Max(1, pings.SentPings.Count)) * 100:F2}%");
-            Log.Information($"Anzahl an erfolgreichen Pings: {pings.SuccessfulPings.Count} => {pings.SuccessfulPingsPercentage:F2}%");
-            Log.Information($"Anzahl an nicht erfolgreichen Pings: {pings.FailedPings.Count} => {pings.FailedPingsPercent:F2}%");
-            Log.Information($"Anzahl an nicht gesendeten Pings: {pings.ExceptionPings.Count} => {pings.ExceptionPingsPercentage:F2}");
+            Log.Information($"Anzahl an gesendeten Pings: {pings.SentPings.Count()} => {(pings.Count / Math.Max(1, pings.SentPings.Count())) * 100:F2}%");
+            Log.Information($"Anzahl an erfolgreichen Pings: {pings.SuccessfulPings.Count()} => {pings.SuccessfulPingsPercentage:F2}%");
+            Log.Information($"Anzahl an nicht erfolgreichen Pings: {pings.FailedPings.Count()} => {pings.FailedPingsPercent:F2}%");
+            Log.Information($"Anzahl an nicht gesendeten Pings: {pings.ExceptionPings.Count()} => {pings.ExceptionPingsPercentage:F2}");
             Log.Information($"Minimale Latenz: {pings.MinLatency:F2}ms");
             Log.Information($"MAximale Latenz: {pings.MaxLatency:F2}ms");
             Log.Information($"Durchschnittliche Latenz: {pings.AvgLatency:F2}ms");
