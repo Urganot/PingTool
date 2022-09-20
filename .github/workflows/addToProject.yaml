@@ -1,4 +1,4 @@
-name: Add all issues and prs to project board
+name: Add all issues and prs to project board test123
 
 on:
   issues:
