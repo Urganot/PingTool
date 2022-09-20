@@ -4,6 +4,9 @@ on:
   issues:
     types:
       - opened
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
   add-to-project:
