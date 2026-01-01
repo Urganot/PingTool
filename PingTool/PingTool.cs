@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using CommandLine;
@@ -12,62 +13,56 @@ namespace PingTool;
 
 internal static class PingTool
 {
-    public static IEnumerable<IPAddress> Targets;
-    public static int Interval;
-    public static bool OptionsValid = true;
-    public static bool OutPutCsv;
-    public static string LogFileName;
-    public static string OutputTemplate;
-
-    private static int PingTimeout => (int)Math.Floor(Interval * 1000 * 0.8);
-
     public static Dictionary<IPAddress, Pings> PingsByTarget { get; } = [];
-    
-    private static List<ConsoleKey> CancelKeys = [ConsoleKey.Escape, ConsoleKey.X];
 
     private static void Main(string[] args)
     {
-        Parser.Default.ParseArguments<Options>(args)
-            .WithParsed(CommandLineParser.RunOptions)
-            .WithNotParsed(CommandLineParser.HandleParseError);
+        var parserResult = Parser.Default.ParseArguments<Options>(args);
 
-        if (OptionsValid)
+        if (!parserResult.Errors.Any())
         {
-            var saveFile = Path.Combine(Directory.GetCurrentDirectory(), LogFileName);
+            var configuration = parserResult.Value;
+
+            var saveFile = Path.Combine(Directory.GetCurrentDirectory(), configuration.LogFileName);
             saveFile = Path.ChangeExtension(saveFile, "txt");
 
-            StartUp.SetupLogger(OutputTemplate, saveFile);
+            StartUp.SetupLogger(configuration.OutputTemplate, saveFile);
 
-            LoggerTemplates.OutputStartText(Targets, saveFile, Interval, PingTimeout);
+            LoggerTemplates.OutputStartText(configuration.Targets, saveFile, configuration.Interval,
+                configuration.PingTimeout);
 
-            foreach (var target in Targets)
+            foreach (var target in configuration.Targets)
             {
-                PingsByTarget.Add(target, new Pings {Target = target});
+                PingsByTarget.Add(target, new Pings { Target = target });
             }
-            
+
             Log.Information("Pingvorgang gestartet");
-            
-            var key = ConsoleKey.Spacebar;
+
+            State state;
 
             do
             {
+                state = GetState(configuration);
+
                 foreach (var (target, pings) in PingsByTarget)
                 {
-                    pings.Add(Ping.Send(target, PingTimeout));
-                    
-                    if (Console.KeyAvailable)
-                    {
-                        key = Console.ReadKey(true).Key;
-                        if (CancelKeys.Contains(key)) LoggerTemplates.OutputIntermediateStatistics(pings);
-                        else LoggerTemplates.OutputEndStatistics(pings);
-                    }
+                    pings.Add(Ping.Send(target, configuration.PingTimeout));
+
+                    if (state == State.PrintIntermediate)
+                        pings.OutputIntermediateStatistics();
                 }
-                
-                Thread.Sleep(Interval * 1000);
 
-            } while (!CancelKeys.Contains(key));
+                Thread.Sleep(configuration.Interval * 1000);
+            } while (state != State.EndRun);
 
-            if (OutPutCsv) WriteCsvFile(Path.ChangeExtension(LogFileName, "csv"), PingsByTarget);
+            foreach (var (_, pings) in PingsByTarget)
+            {
+                pings.OutputEndStatistics();
+            }
+
+
+            if (configuration.OutputCsv)
+                WriteCsvFile(Path.ChangeExtension(configuration.LogFileName, "csv"), PingsByTarget);
 
             Log.CloseAndFlush();
         }
@@ -76,17 +71,36 @@ internal static class PingTool
         Console.ReadKey();
     }
 
+    private static State GetState(Options configuration)
+    {
+        State state;
+        if (!Console.KeyAvailable)
+            state = State.Default;
+        else if (configuration.CancelKeys.Contains(Console.ReadKey(true).Key))
+            state = State.EndRun;
+        else
+            state = State.PrintIntermediate;
+        return state;
+    }
+
     private static void WriteCsvFile(string fileName, Dictionary<IPAddress, Pings> pingsByTarget)
     {
-        foreach (var (_, pings) in pingsByTarget)
+        using (var writer = new StreamWriter(fileName))
         {
-            using (var writer = new StreamWriter(fileName))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                foreach (var (_, pings) in pingsByTarget)
                 {
-                    csv.WriteRecords(pings.pings);
+                    csv.WriteRecords(pings.ListOfPings);
                 }
             }
         }
+    }
+
+    internal enum State
+    {
+        Default,
+        PrintIntermediate,
+        EndRun
     }
 }

@@ -7,19 +7,23 @@ namespace PingTool;
 
 internal class Pings
 {
+    public readonly List<Ping> ListOfPings = [];
     public required IPAddress Target { get; init; }
-    
-    public List<Ping> pings = new();
-    public int Count => pings.Count;
 
-    public IEnumerable<Ping> SuccessfulPings => pings.Where(ping => ping.Status == IPStatus.Success).ToList();
-    public double SuccessfulPingsPercentage => (double)SuccessfulPings.Count() / pings.Count * 100;
-    public IEnumerable<Ping> FailedPings => pings.Where(ping => ping.Status != IPStatus.Success);
-    public double FailedPingsPercent => (double)FailedPings.Count() / pings.Count * 100;
-    public IEnumerable<Ping> ExceptionPings => pings.Where(ping => ping.Exception).ToList();
-    public double ExceptionPingsPercentage => (double)ExceptionPings.Count() / pings.Count * 100;
+    public int Count => ListOfPings.Count;
 
-    public IEnumerable<Ping> SentPings => pings.Where(ping => !ping.Exception).ToList();
+    public IEnumerable<Ping> SentPings => ListOfPings.Where(ping => !ping.Exception).ToList();
+    public double SentPingsPercentage => (double)SentPings.Count() / ListOfPings.Count;
+
+    public IEnumerable<Ping> ExceptionPings => ListOfPings.Where(ping => ping.Exception).ToList();
+    public double ExceptionPingsPercentage => (double)ExceptionPings.Count() / ListOfPings.Count;
+
+    public IEnumerable<Ping> SuccessfulPings => ListOfPings.Where(ping => ping.Status == IPStatus.Success).ToList();
+    public double SuccessfulPingsPercentage => (double)SuccessfulPings.Count() / ListOfPings.Count;
+
+    public IEnumerable<Ping> FailedPings => ListOfPings.Where(ping => ping.Status != IPStatus.Success);
+    public double FailedPingsPercent => (double)FailedPings.Count() / ListOfPings.Count;
+
 
     public long MinLatency => SuccessfulPings.Min(ping => ping.Latency);
     public long MaxLatency => SuccessfulPings.Max(ping => ping.Latency);
@@ -27,6 +31,16 @@ internal class Pings
 
     public void Add(Ping ping)
     {
-        pings.Add(ping);
+        ListOfPings.Add(ping);
+    }
+
+    public void OutputIntermediateStatistics()
+    {
+        LoggerTemplates.OutputIntermediateStatistics(this);
+    }
+
+    public void OutputEndStatistics()
+    {
+        LoggerTemplates.OutputEndStatistics(this);
     }
 }

@@ -7,11 +7,11 @@ namespace PingTool;
 
 internal class Ping
 {
-    public string Target { get; set; }
-    public long Latency { get; set; }
-    public IPStatus Status { get; set; }
-    public bool Exception { get; set; }
-    public string Time { get; set; }
+    public required string Target { get; init; }
+    public long Latency { get; init; }
+    public required IPStatus Status { get; init; }
+    public bool Exception { get; init; }
+    public string? Time { get; init; }
 
     public static Ping Send(IPAddress ipAddress, int pingTimeout)
     {
@@ -19,32 +19,27 @@ internal class Ping
         {
             var pingResult = new System.Net.NetworkInformation.Ping().Send(ipAddress, pingTimeout);
 
-            if (pingResult != null)
-            {
-                Log.Information(
-                    $"Pinged {pingResult.Address} Status: {pingResult.Status} Latency: {pingResult.RoundtripTime}ms");
-                return new Ping
-                {
-                    Target = pingResult.Address.ToString(),
-                    Latency = pingResult.RoundtripTime,
-                    Status = pingResult.Status,
-                    Time = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")
-                };
-            }
-
+            Log.Information(
+                "Pinged {PingResultAddress} Status: {PingResultStatus} Latency: {PingResultRoundtripTime}ms",
+                pingResult.Address, pingResult.Status, pingResult.RoundtripTime);
             return new Ping
             {
-                Target = ipAddress.ToString(),
-                Status = IPStatus.Unknown
+                Target = pingResult.Address.ToString(),
+                Latency = pingResult.RoundtripTime,
+                Status = pingResult.Status,
+                Time = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")
             };
         }
         catch (PingException pEx)
         {
-            Log.Information(
-                $"Pinged {ipAddress} Status: Exception Message:{pEx.Message} => {pEx.InnerException?.Message ?? "No more detailed message"}");
+            Log.Information("Pinged {IpAddress} Status: Exception Message:{PExMessage} => {NoMoreDetailedMessage}",
+                ipAddress, pEx.Message, pEx.InnerException?.Message ?? "No more detailed message");
+
             return new Ping
             {
-                Exception = true
+                Target = ipAddress.ToString(),
+                Exception = true,
+                Status = IPStatus.Unknown
             };
         }
     }
