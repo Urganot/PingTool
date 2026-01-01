@@ -11,6 +11,8 @@ namespace PingTool
             PingTool.Target = IPAddress.Parse(opts.Target);
             PingTool.Interval = opts.Interval;
             PingTool.OutPutCsv = opts.OutputCsv;
+            PingTool.LogFileName = opts.LogFileName;
+            PingTool.OutputTemplate = opts.OutputTemplate;
         }
 
         public static void HandleParseError(IEnumerable<Error> errs)

@@ -12,4 +12,10 @@ class Options
 
     [Option('c', "csv", Default = Defaults.DefaultIntervall, HelpText = "Creates an additional csv file.")]
     public bool OutputCsv { get; set; }
+    
+    [Option('f', "log-file", Default = Defaults.DefaultLogFileName, HelpText = "Name of the log file.")]
+    public string LogFileName { get; set; }
+    
+    [Option('o', "output-template", Default = Defaults.DefaultOutputTemplate, HelpText = "Template for the output text.")]
+    public string OutputTemplate { get; set; }
 }

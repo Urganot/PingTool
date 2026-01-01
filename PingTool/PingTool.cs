@@ -1,30 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Threading;
-using Microsoft.Extensions.Configuration;
 using Serilog;
-using Serilog.Core;
-using Serilog.Debugging;
-using Serilog.Events;
-using System.Configuration;
-using System.Dynamic;
 using System.Globalization;
-using System.Reflection;
-using System.Text;
 using CommandLine;
 using CsvHelper;
-using Microsoft.Extensions.Options;
 
 namespace PingTool
 {
     static class PingTool
     {
-        private static string _defaultLogFileName = "PingLogFiles\\Logfile";
-
-        private static readonly string _defaultOutputTemplate = "[{Timestamp:dd-MM-yyyy HH:mm:ss}] {Message:lj}{NewLine}{Exception}";
 
         private static int PingTimeout => ((int)Math.Floor(Interval * 1000 * 0.8));
 
@@ -32,6 +18,9 @@ namespace PingTool
         public static int Interval;
         public static bool OptionsValid = true;
         public static bool OutPutCsv;
+        public static string LogFileName;
+        public static string OutputTemplate;
+        
         public static Pings Pings { get; set; } = new Pings();
 
         static void Main(string[] args)
@@ -39,16 +28,13 @@ namespace PingTool
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(CommandLineParser.RunOptions)
                 .WithNotParsed(CommandLineParser.HandleParseError);
-
-            var logfileName = ConfigurationManager.AppSettings["FileName"] ?? _defaultLogFileName;
-            var outputTemplate = ConfigurationManager.AppSettings["OutputTemplate"] ?? _defaultOutputTemplate;
-
+            
             if (OptionsValid)
             {
-                var saveFile = Path.Combine(Directory.GetCurrentDirectory(), logfileName);
+                var saveFile = Path.Combine(Directory.GetCurrentDirectory(), LogFileName);
                 saveFile = Path.ChangeExtension(saveFile, "txt");
 
-                StartUp.SetupLogger(outputTemplate, saveFile);
+                StartUp.SetupLogger(OutputTemplate, saveFile);
 
                 LoggerTemplates.OutputStartText(Target, saveFile, Interval, PingTimeout);
 
@@ -69,7 +55,7 @@ namespace PingTool
                     }
                 } while (key != ConsoleKey.Escape);
 
-                if (OutPutCsv) WriteCsvFile(Path.ChangeExtension(logfileName, "csv"), Pings);
+                if (OutPutCsv) WriteCsvFile(Path.ChangeExtension(LogFileName, "csv"), Pings);
 
                 Log.CloseAndFlush();
             }
