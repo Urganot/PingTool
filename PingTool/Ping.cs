@@ -7,11 +7,10 @@ namespace PingTool;
 
 internal class Ping
 {
-    public required string Target { get; init; }
     public long Latency { get; init; }
     public required IPStatus Status { get; init; }
     public bool Exception { get; init; }
-    public string? Time { get; init; }
+    public DateTimeOffset? Time { get; init; }
 
     public static Ping Send(IPAddress ipAddress, int pingTimeout)
     {
@@ -22,12 +21,12 @@ internal class Ping
             Log.Information(
                 "Pinged {PingResultAddress} Status: {PingResultStatus} Latency: {PingResultRoundtripTime}ms",
                 pingResult.Address, pingResult.Status, pingResult.RoundtripTime);
+
             return new Ping
             {
-                Target = pingResult.Address.ToString(),
                 Latency = pingResult.RoundtripTime,
                 Status = pingResult.Status,
-                Time = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")
+                Time = DateTimeOffset.UtcNow
             };
         }
         catch (PingException pEx)
@@ -37,7 +36,6 @@ internal class Ping
 
             return new Ping
             {
-                Target = ipAddress.ToString(),
                 Exception = true,
                 Status = IPStatus.Unknown
             };

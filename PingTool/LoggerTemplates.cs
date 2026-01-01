@@ -11,8 +11,8 @@ internal static class LoggerTemplates
     public static void OutputStartText(IEnumerable<IPAddress> targets, string saveFile, int interval, int pingTimeout)
     {
         Log.Information("Einstellungen");
-        Log.Information("Datum: {ShortDateString}", DateTime.Now.ToShortDateString());
-        Log.Information("Uhrzeit: {ShortTimeString}", DateTime.Now.ToShortTimeString());
+        Log.Information("Datum: {ShortDateString}", DateTime.UtcNow.ToLocalTime().ToShortDateString());
+        Log.Information("Uhrzeit: {ShortTimeString}", DateTime.UtcNow.ToLocalTime().ToShortTimeString());
         Log.Information("Ziel: {Join}", string.Join(", ", targets));
         Log.Information("Zeit zwischen Pings: {Interval}s", interval);
         Log.Information("Zeit bis  Ping Timeout: {PingTimeout}ms", pingTimeout);

@@ -13,7 +13,7 @@ namespace PingTool;
 
 internal static class PingTool
 {
-    public static Dictionary<IPAddress, Pings> PingsByTarget { get; } = [];
+    private static Dictionary<IPAddress, Pings> PingsByTarget { get; } = [];
 
     private static void Main(string[] args)
     {
@@ -97,7 +97,7 @@ internal static class PingTool
         }
     }
 
-    internal enum State
+    private enum State
     {
         Default,
         PrintIntermediate,

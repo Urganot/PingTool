@@ -4,6 +4,8 @@ using System.Linq;
 using System.Net;
 using CommandLine;
 
+namespace PingTool;
+
 internal class Options
 {
     public List<ConsoleKey> CancelKeys = [ConsoleKey.Escape, ConsoleKey.X];
