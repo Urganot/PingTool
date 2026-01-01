@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Serilog;
@@ -7,12 +8,12 @@ namespace PingTool;
 
 internal static class LoggerTemplates
 {
-    public static void OutputStartText(IPAddress target, string saveFile, int interval, int pingTimeout)
+    public static void OutputStartText(IEnumerable<IPAddress> targets, string saveFile, int interval, int pingTimeout)
     {
         Log.Information("Einstellungen");
         Log.Information($"Datum: {DateTime.Now.ToShortDateString()}");
         Log.Information($"Uhrzeit: {DateTime.Now.ToShortTimeString()}");
-        Log.Information($"Ziel: {target}");
+        Log.Information($"Ziel: {string.Join(", ",targets)}");
         Log.Information($"Zeit zwischen Pings: {interval}s");
         Log.Information($"Zeit bis  Ping Timeout: {pingTimeout}ms");
         Log.Debug($"Logfile wird gespeichert unter: {saveFile}");

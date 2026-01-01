@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -11,7 +12,7 @@ namespace PingTool;
 
 internal static class PingTool
 {
-    public static IPAddress Target;
+    public static IEnumerable<IPAddress> Targets;
     public static int Interval;
     public static bool OptionsValid = true;
     public static bool OutPutCsv;
@@ -20,7 +21,9 @@ internal static class PingTool
 
     private static int PingTimeout => (int)Math.Floor(Interval * 1000 * 0.8);
 
-    public static Pings Pings { get; set; } = new();
+    public static Dictionary<IPAddress, Pings> PingsByTarget { get; } = [];
+    
+    private static List<ConsoleKey> CancelKeys = [ConsoleKey.Escape, ConsoleKey.X];
 
     private static void Main(string[] args)
     {
@@ -35,26 +38,36 @@ internal static class PingTool
 
             StartUp.SetupLogger(OutputTemplate, saveFile);
 
-            LoggerTemplates.OutputStartText(Target, saveFile, Interval, PingTimeout);
+            LoggerTemplates.OutputStartText(Targets, saveFile, Interval, PingTimeout);
 
-            Log.Information("Pingvorgang gestartet.");
+            foreach (var target in Targets)
+            {
+                PingsByTarget.Add(target, new Pings {Target = target});
+            }
+            
+            Log.Information("Pingvorgang gestartet");
+            
             var key = ConsoleKey.Spacebar;
 
             do
             {
-                Pings.Add(Ping.Send(Target, PingTimeout));
-
+                foreach (var (target, pings) in PingsByTarget)
+                {
+                    pings.Add(Ping.Send(target, PingTimeout));
+                    
+                    if (Console.KeyAvailable)
+                    {
+                        key = Console.ReadKey(true).Key;
+                        if (CancelKeys.Contains(key)) LoggerTemplates.OutputIntermediateStatistics(pings);
+                        else LoggerTemplates.OutputEndStatistics(pings);
+                    }
+                }
+                
                 Thread.Sleep(Interval * 1000);
 
-                if (Console.KeyAvailable)
-                {
-                    key = Console.ReadKey(true).Key;
-                    if (key != ConsoleKey.Escape) LoggerTemplates.OutputIntermediateStatistics(Pings);
-                    else LoggerTemplates.OutputEndStatistics(Pings);
-                }
-            } while (key != ConsoleKey.Escape);
+            } while (!CancelKeys.Contains(key));
 
-            if (OutPutCsv) WriteCsvFile(Path.ChangeExtension(LogFileName, "csv"), Pings);
+            if (OutPutCsv) WriteCsvFile(Path.ChangeExtension(LogFileName, "csv"), PingsByTarget);
 
             Log.CloseAndFlush();
         }
@@ -63,12 +76,17 @@ internal static class PingTool
         Console.ReadKey();
     }
 
-    private static void WriteCsvFile(string fileName, Pings pings)
+    private static void WriteCsvFile(string fileName, Dictionary<IPAddress, Pings> pingsByTarget)
     {
-        using (var writer = new StreamWriter(fileName))
-        using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+        foreach (var (_, pings) in pingsByTarget)
         {
-            csv.WriteRecords(pings.pings);
+            using (var writer = new StreamWriter(fileName))
+            {
+                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                {
+                    csv.WriteRecords(pings.pings);
+                }
+            }
         }
     }
 }

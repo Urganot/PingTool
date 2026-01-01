@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using CommandLine;
 
@@ -8,7 +9,7 @@ internal static class CommandLineParser
 {
     public static void RunOptions(Options opts)
     {
-        PingTool.Target = IPAddress.Parse(opts.Target);
+        PingTool.Targets = opts.Targets.Select(IPAddress.Parse);
         PingTool.Interval = opts.Interval;
         PingTool.OutPutCsv = opts.OutputCsv;
         PingTool.LogFileName = opts.LogFileName;

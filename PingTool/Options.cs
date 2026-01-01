@@ -1,10 +1,11 @@
-﻿using CommandLine;
+﻿using System.Collections.Generic;
+using CommandLine;
 using PingTool;
 
 internal class Options
 {
     [Option('t', "target", Default = Defaults.DefaultTarget, HelpText = "Which IP should be tested?")]
-    public string Target { get; set; }
+    public IEnumerable<string> Targets { get; set; }
 
     [Option('i', "interval", Default = Defaults.DefaultIntervall, HelpText = "Prints all messages to standard output.")]
     public int Interval { get; set; }

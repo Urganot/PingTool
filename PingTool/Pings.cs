@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 
 namespace PingTool;
 
 internal class Pings
 {
+    public required IPAddress Target { get; init; }
+    
     public List<Ping> pings = new();
     public int Count => pings.Count;
 
