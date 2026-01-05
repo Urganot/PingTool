@@ -7,13 +7,16 @@ using System.Net;
 using System.Threading;
 using CommandLine;
 using CsvHelper;
+using PingTool.Configuration;
+using PingTool.Logging;
+using PingTool.Pings;
 using Serilog;
 
 namespace PingTool;
 
 internal static class PingTool
 {
-    private static Dictionary<IPAddress, Pings> PingsByTarget { get; } = [];
+    private static Dictionary<IPAddress, PingResult> PingResults { get; } = [];
 
     private static void Main(string[] args)
     {
@@ -23,17 +26,17 @@ internal static class PingTool
         {
             var configuration = parserResult.Value;
 
-            var saveFile = Path.Combine(Directory.GetCurrentDirectory(), configuration.LogFileName);
-            saveFile = Path.ChangeExtension(saveFile, "txt");
+            LoggerUtils.SetupLogger(configuration);
 
-            StartUp.SetupLogger(configuration.OutputTemplate, saveFile);
-
-            LoggerTemplates.OutputStartText(configuration.Targets, saveFile, configuration.Interval,
-                configuration.PingTimeout);
+            LoggerTemplates.OutputStartText(
+                configuration.Targets,
+                configuration.Interval,
+                configuration.PingTimeout
+            );
 
             foreach (var target in configuration.Targets)
             {
-                PingsByTarget.Add(target, new Pings { Target = target });
+                PingResults.Add(target, new PingResult { Target = target });
             }
 
             Log.Information("Pingvorgang gestartet");
@@ -44,7 +47,7 @@ internal static class PingTool
             {
                 state = GetState(configuration);
 
-                foreach (var (target, pings) in PingsByTarget)
+                foreach (var (target, pings) in PingResults)
                 {
                     pings.Add(Ping.Send(target, configuration.PingTimeout));
 
@@ -55,14 +58,14 @@ internal static class PingTool
                 Thread.Sleep(configuration.Interval * 1000);
             } while (state != State.EndRun);
 
-            foreach (var (_, pings) in PingsByTarget)
+            foreach (var (_, pings) in PingResults)
             {
                 pings.OutputEndStatistics();
             }
 
 
             if (configuration.OutputCsv)
-                WriteCsvFile(Path.ChangeExtension(configuration.LogFileName, "csv"), PingsByTarget);
+                WriteCsvFile(Path.ChangeExtension(configuration.LogFileName, "csv"), PingResults);
 
             Log.CloseAndFlush();
         }
@@ -83,7 +86,7 @@ internal static class PingTool
         return state;
     }
 
-    private static void WriteCsvFile(string fileName, Dictionary<IPAddress, Pings> pingsByTarget)
+    private static void WriteCsvFile(string fileName, Dictionary<IPAddress, PingResult> pingsByTarget)
     {
         using (var writer = new StreamWriter(fileName))
         {

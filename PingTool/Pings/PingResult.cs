@@ -2,10 +2,11 @@
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using PingTool.Logging;
 
-namespace PingTool;
+namespace PingTool.Pings;
 
-internal class Pings
+internal class PingResult
 {
     public readonly List<Ping> ListOfPings = [];
     public required IPAddress Target { get; init; }

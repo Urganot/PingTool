@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using Serilog;
 
-namespace PingTool;
+namespace PingTool.Pings;
 
 internal class Ping
 {
@@ -20,7 +20,10 @@ internal class Ping
 
             Log.Information(
                 "Pinged {PingResultAddress} Status: {PingResultStatus} Latency: {PingResultRoundtripTime}ms",
-                pingResult.Address, pingResult.Status, pingResult.RoundtripTime);
+                pingResult.Address,
+                pingResult.Status,
+                pingResult.RoundtripTime
+            );
 
             return new Ping
             {
@@ -31,8 +34,12 @@ internal class Ping
         }
         catch (PingException pEx)
         {
-            Log.Information("Pinged {IpAddress} Status: Exception Message:{PExMessage} => {NoMoreDetailedMessage}",
-                ipAddress, pEx.Message, pEx.InnerException?.Message ?? "No more detailed message");
+            Log.Information(
+                "Pinged {IpAddress} Status: Exception Message:{PExMessage} => {NoMoreDetailedMessage}",
+                ipAddress,
+                pEx.Message,
+                pEx.InnerException?.Message ?? "No more detailed message"
+            );
 
             return new Ping
             {

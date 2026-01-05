@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using CommandLine;
 
-namespace PingTool;
+namespace PingTool.Configuration;
 
 internal class Options
 {
@@ -28,8 +28,12 @@ internal class Options
     [Option('f', "log-file", Default = "PingLogFiles\\Logfile", HelpText = "Name of the log file.")]
     public string LogFileName { get; set; }
 
-    [Option('o', "output-template", Default = "[{Timestamp:dd-MM-yyyy HH:mm:ss}] {Message:lj}{NewLine}{Exception}",
-        HelpText = "Template for the output text.")]
+    [Option(
+        'o',
+        "output-template",
+        Default = "[{Timestamp:dd-MM-yyyy HH:mm:ss}] {Message:lj}{NewLine}{Exception}",
+        HelpText = "Template for the output text."
+    )]
     public string OutputTemplate { get; set; }
 
     public int PingTimeout => (int)Math.Floor(Interval * 1000 * 0.8);
