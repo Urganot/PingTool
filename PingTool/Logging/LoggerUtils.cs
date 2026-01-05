@@ -22,6 +22,9 @@ internal static class LoggerUtils
 
         CurrentLogFilePath = computedLogFilePath;
 
+        if (configuration.OutputTemplate == null)
+            throw new ArgumentNullException(nameof(configuration.OutputTemplate));
+
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.Console(outputTemplate: configuration.OutputTemplate)
@@ -32,6 +35,9 @@ internal static class LoggerUtils
     private static string GetBaseLogFilePath(Options configuration)
     {
         string baseLogFilePath;
+
+        if (configuration.LogFileName == null)
+            throw new ArgumentNullException(nameof(configuration.LogFileName));
 
         if (Path.IsPathFullyQualified(configuration.LogFileName))
             baseLogFilePath = configuration.LogFileName;
@@ -54,7 +60,7 @@ internal static class LoggerUtils
         return Path.ChangeExtension(logFilePath, "txt");
     }
 
-    private static string MakeUnique(string startLogFilePath, string delimiter = "_")
+    private static string MakeUnique(string startLogFilePath)
     {
         if (!Path.Exists(startLogFilePath))
             return startLogFilePath;

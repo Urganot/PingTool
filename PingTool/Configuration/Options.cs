@@ -17,7 +17,7 @@ internal class Options
         set => Targets = value.Select(IPAddress.Parse);
     }
 
-    public IEnumerable<IPAddress> Targets { get; set; }
+    public IEnumerable<IPAddress> Targets { get; set; } = [];
 
     [Option('i', "interval", Default = 1, HelpText = "Prints all messages to standard output.")]
     public int Interval { get; set; }
@@ -26,7 +26,7 @@ internal class Options
     public bool OutputCsv { get; set; }
 
     [Option('f', "log-file", Default = "PingLogFiles\\Logfile", HelpText = "Name of the log file.")]
-    public string LogFileName { get; set; }
+    public string? LogFileName { get; set; }
 
     [Option(
         'o',
@@ -34,7 +34,7 @@ internal class Options
         Default = "[{Timestamp:dd-MM-yyyy HH:mm:ss}] {Message:lj}{NewLine}{Exception}",
         HelpText = "Template for the output text."
     )]
-    public string OutputTemplate { get; set; }
+    public string? OutputTemplate { get; set; }
 
     public int PingTimeout => (int)Math.Floor(Interval * 1000 * 0.8);
 }

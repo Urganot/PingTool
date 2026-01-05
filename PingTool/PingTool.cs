@@ -65,7 +65,7 @@ internal static class PingTool
 
 
             if (configuration.OutputCsv)
-                WriteCsvFile(Path.ChangeExtension(configuration.LogFileName, "csv"), PingResults);
+                WriteCsvFile(Path.ChangeExtension(LoggerUtils.CurrentLogFilePath, "csv"), PingResults);
 
             Log.CloseAndFlush();
         }
@@ -86,13 +86,13 @@ internal static class PingTool
         return state;
     }
 
-    private static void WriteCsvFile(string fileName, Dictionary<IPAddress, PingResult> pingsByTarget)
+    private static void WriteCsvFile(string fileName, Dictionary<IPAddress, PingResult> pingResults)
     {
         using (var writer = new StreamWriter(fileName))
         {
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                foreach (var (_, pings) in pingsByTarget)
+                foreach (var (_, pings) in pingResults)
                 {
                     csv.WriteRecords(pings.ListOfPings);
                 }
