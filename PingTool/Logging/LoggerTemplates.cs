@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using PingTool.Pings;
 using Serilog;
 
@@ -67,6 +68,17 @@ internal static class LoggerTemplates
             pingResult.FailedPings.Count(),
             pingResult.FailedPingsPercent
         );
+
+        var resultsByStatus = pingResult.ListOfPings
+            .Where(ping => ping.Status != IPStatus.Success)
+            .GroupBy(ping => ping.Status)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        foreach (var (status, pings) in resultsByStatus)
+        {
+            Log.Information("    {Status} => {Count}", status, pings.Count);
+        }
+
         Log.Information(
             "Anzahl an nicht gesendeten Pings: {Count} => {PingsExceptionPingsPercentage:P2}",
             pingResult.ExceptionPings.Count(),
